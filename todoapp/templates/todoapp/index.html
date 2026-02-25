@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: #f0f4f8; }
+        .navbar { background: #1F4E79 !important; }
+        .card { border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+        .task-item { border-left: 4px solid #1F4E79; margin-bottom: 10px; border-radius: 8px; }
+        .task-item.completed { border-left-color: #538135; }
+        .task-item.completed .task-title { text-decoration: line-through; color: #aaa; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-dark mb-4">
+        <div class="container">
+            <span class="navbar-brand fw-bold fs-4">📝 Task Manager</span>
+            {% if user.is_authenticated %}
+            <div class="d-flex align-items-center gap-3">
+                <span class="text-white">Hello, {{ user.username }}!</span>
+                <a href="/logout/" class="btn btn-outline-light btn-sm">Logout</a>
+            </div>
+            {% endif %}
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-8 col-lg-6">
+
+                <div class="card p-4 mb-4">
+                    <form action="/add/" method="POST" class="d-flex gap-2">
+                        {% csrf_token %}
+                        <input type="text" name="title" class="form-control" placeholder="Add a new task..." required>
+                        <button type="submit" class="btn btn-primary px-4" style="background:#1F4E79; border:none;">Add</button>
+                    </form>
+                </div>
+
+                {% if tasks %}
+                    {% for task in tasks %}
+                    <div class="card p-3 task-item {% if task.completed %}completed{% endif %}">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <span class="task-title fs-6">{{ task.title }}</span>
+                            <div class="d-flex gap-2">
+                                <form action="/complete/{{ task.id }}/" method="POST">
+                                    {% csrf_token %}
+                                    <button class="btn btn-success btn-sm" type="submit">
+                                        {% if task.completed %}Undo{% else %}Done{% endif %}
+                                    </button>
+                                </form>
+                                <form action="/delete/{{ task.id }}/" method="POST">
+                                    {% csrf_token %}
+                                    <button class="btn btn-danger btn-sm" type="submit">Delete</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center text-muted mt-5">
+                        <p class="fs-5">No tasks yet. Add your first task above!</p>
+                    </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
